@@ -22,22 +22,45 @@ namespace WeatherStationWebApp.Tests
 
         private DbContextOptions<ApplicationDbContext> _opt;
         private ApplicationDbContext _context;
-        private readonly DateTime _initialTime = new DateTime(2020, 10, 10, 10, 10, 10);
 
-        [SetUp]
+        private readonly DateTime _initialTime = new DateTime(2020, 01, 02);
+        
+        List<Observation> _dummyData = new List<Observation>(){
+            new Observation()
+            {
+                ObservationId = 1,
+                Time = new DateTime(2020, 01, 02)
+            },
+            new Observation()
+            {
+                ObservationId = 2,
+                Time = new DateTime(2020, 01, 02).AddHours(2)
+            },
+            new Observation()
+            {
+                ObservationId = 3,
+                Time = new DateTime(2020, 01, 02).AddHours(5)
+            },
+            new Observation()
+            {
+                ObservationId = 4,
+                Time = new DateTime(2020, 01, 02).AddDays(1).AddHours(3)
+            },
+        };
+
+    [SetUp]
         public void Setup()
         {
-            _opt = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "TestDB").Options;
-
+            _opt = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase(databaseName: "TestDB").Options;
             _fakeHub = Substitute.For<IHubContext<UpdateHub>>();
 
-            List<Observation> weatherObservations = GetWeathersObservationsForTest();
-
+            List<Observation> weatherObservations = _dummyData;
             _context = new ApplicationDbContext(_opt);
             _context.Database.EnsureCreated();
             _context.Observations.AddRange(weatherObservations);
             _context.SaveChanges();
+
+            _uut = new ObservationsController(_context, _fakeHub);
         }
 
         [TearDown]
@@ -49,28 +72,24 @@ namespace WeatherStationWebApp.Tests
         [Test]
         public async Task GetObservations_ListCountIsCorrect()
         {
-            _uut = new ObservationsController(_context, _fakeHub);
+            var obs = await _uut.GetObservations();
+            var obsList = obs.Value.ToList();
 
-            var result = await _uut.GetObservations();
-            var returnedList = result.Value.ToList();
-
-            Assert.That(returnedList.Count, Is.EqualTo(3));
+            Assert.AreEqual(obsList.Count, 3);
         }
 
         [Test]
-        public async Task GetObservations_ValuesCorrect()
+        public async Task GetObservations_ValuesAreCorrect()
         {
-            _uut = new ObservationsController(_context, _fakeHub);
+            var obs = await _uut.GetObservations();
+            var obsList = obs.Value.ToList();
 
-            var result = await _uut.GetObservations();
-            var returnedList = result.Value.ToList();
+            var obsExpected = GetDtoWeatherObservationsForTest().OrderByDescending(o => o.Time).Take(3).ToList();
 
-            var expectedDtoWeatherObservations =
-                GetDtoWeatherObservationsForTest().OrderByDescending(o => o.Time).Take(3).ToList();
-
-            Assert.That(returnedList[0].Time, Is.EqualTo(expectedDtoWeatherObservations[0].Time));
-            Assert.That(returnedList[1].Time, Is.EqualTo(expectedDtoWeatherObservations[1].Time));
-            Assert.That(returnedList[2].Time, Is.EqualTo(expectedDtoWeatherObservations[2].Time));
+            for(int i = 0; i < 3; i++)
+            {
+                Assert.That(obsList[i].Time, Is.EqualTo(obsExpected[i].Time));
+            }
         }
 
         [Test]
@@ -78,8 +97,6 @@ namespace WeatherStationWebApp.Tests
         {
             DateTime startTime = _initialTime;
             DateTime endTime = _initialTime.AddHours(3); //Should only contain 2 weatherObservations in this time-range
-
-            _uut = new ObservationsController(_context, _fakeHub);
 
             var result = await _uut.GetObservations(startTime, endTime);
             var returnedList = result.Value.ToList();
@@ -93,7 +110,7 @@ namespace WeatherStationWebApp.Tests
 
         private List<Observation> GetDtoWeatherObservationsForTest()
         {
-            var weatherObservations = GetWeathersObservationsForTest();
+            var weatherObservations = _dummyData;
 
             List<Observation> dtoWeatherObservations = new List<Observation>();
 
@@ -112,58 +129,6 @@ namespace WeatherStationWebApp.Tests
             }
 
             return dtoWeatherObservations;
-        }
-
-        private List<Observation> GetWeathersObservationsForTest()
-        {
-
-            return new List<Observation>()
-            {
-                new Observation()
-                {
-                    ObservationId = 1,
-                    Time = _initialTime,
-                    Temperature = 20.5,
-                    Humidity = 2,
-                    AirPressure = 1.4,
-                    Latitude = 20,
-                    Longitude = 20,
-                    LocationName = "Valhalla"
-                },
-                new Observation()
-                {
-                    ObservationId = 2,
-                    Time = _initialTime.AddHours(2),
-                    Temperature = 21.5,
-                    Humidity = 3,
-                    AirPressure = 1.4,
-                    Latitude = 40,
-                    Longitude = 40,
-                    LocationName = "Down under"
-                },
-                new Observation()
-                {
-                    ObservationId = 3,
-                    Time = _initialTime.AddHours(5),
-                    Temperature = 20.5,
-                    Humidity = 2,
-                    AirPressure = 1.4,
-                    Latitude = 20,
-                    Longitude = 20,
-                    LocationName = "Valhalla"
-                },
-                new Observation()
-                {
-                    ObservationId = 4,
-                    Time = _initialTime.AddDays(1).AddHours(3),
-                    Temperature = 16.3,
-                    Humidity = 5,
-                    AirPressure = 1.1,
-                    Latitude = 40,
-                    Longitude = 40,
-                    LocationName = "Down under"
-                },
-            };
         }
     }
 }
