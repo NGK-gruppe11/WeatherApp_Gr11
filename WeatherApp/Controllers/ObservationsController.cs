@@ -45,8 +45,7 @@ namespace WeatherApp.Controllers
         [HttpGet("daterange/{start}/{end}")]
         public async Task<ActionResult<IEnumerable<Observation>>> GetObservations(DateTime start, DateTime end)
         {
-            var observations = await _context.Observations.Where(o => o.Time >= start && o.Time <= end)
-                .OrderByDescending(o => o.Time).ToListAsync();
+            var observations = await _context.Observations.Where(o => o.Time >= start && o.Time <= end).OrderByDescending(o => o.Time).ToListAsync();
 
             foreach (var o in observations)
             {

@@ -1,0 +1,177 @@
+{
+	"info": {
+		"_postman_id": "35170333-80e6-426a-8e52-8c5ba1238935",
+		"name": "VejrApiKald",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "login / get hash",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Email\" : \"teest@teseer\",\r\n    \"Name\": \"TestUsererr\",\r\n    \"Password\": \"Password1!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:44302/api/Account/login",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44302",
+					"path": [
+						"api",
+						"Account",
+						"login"
+					]
+				},
+				"description": "login"
+			},
+			"response": []
+		},
+		{
+			"name": "create observation",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoidGVlc3RAdGVzZWVyIiwibmJmIjoiMTYwNzg1NTg5NiIsImV4cCI6IjE2MDc5NDIyOTYifQ.TzQUFQg4XW4Iu1blpTSKzPgteO6IrWEzfJn6l6lV_cE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"time\": \"1999-12-14\",\r\n    \"temperature\": 1,\r\n    \"humidity\": 2,\r\n    \"airPressure\": 1,\r\n    \"description\": \"Nice observation\",\r\n    \"locationName\": \"Aarhus\",\r\n    \"latitude\": 4,\r\n    \"longitude\": 5\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:44302/api/Observations/create",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44302",
+					"path": [
+						"api",
+						"Observations",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "register user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Email\" : \"teest@teseer\",\r\n    \"Name\": \"TestUsererr\",\r\n    \"Password\": \"Password1!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:44302/api/Account/register",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44302",
+					"path": [
+						"api",
+						"Account",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "latest 3 observations",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44302/api/Observations/last3",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44302",
+					"path": [
+						"api",
+						"Observations",
+						"last3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create range",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44302/api/Observations/daterange/2000-01-01/2001-12-12",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44302",
+					"path": [
+						"api",
+						"Observations",
+						"daterange",
+						"2000-01-01",
+						"2001-12-12"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44302/api/Observations/id/41",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44302",
+					"path": [
+						"api",
+						"Observations",
+						"id",
+						"41"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

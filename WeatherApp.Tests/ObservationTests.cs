@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
 using NUnit.Framework;
+using WeatherApp.Models;
 using WeatherApp.Controllers;
 using WeatherApp.Data;
 using WeatherApp.Hubs;
-using WeatherApp.Models;
 
 namespace WeatherStationWebApp.Tests
 {
@@ -24,29 +23,8 @@ namespace WeatherStationWebApp.Tests
         private ApplicationDbContext _context;
 
         private readonly DateTime _initialTime = new DateTime(2020, 01, 02);
-        
-        List<Observation> _dummyData = new List<Observation>(){
-            new Observation()
-            {
-                ObservationId = 1,
-                Time = new DateTime(2020, 01, 02)
-            },
-            new Observation()
-            {
-                ObservationId = 2,
-                Time = new DateTime(2020, 01, 02).AddHours(2)
-            },
-            new Observation()
-            {
-                ObservationId = 3,
-                Time = new DateTime(2020, 01, 02).AddHours(5)
-            },
-            new Observation()
-            {
-                ObservationId = 4,
-                Time = new DateTime(2020, 01, 02).AddDays(1).AddHours(3)
-            },
-        };
+
+        List<Observation> _dummyData = new List<Observation>(){};
 
     [SetUp]
         public void Setup()
@@ -54,10 +32,21 @@ namespace WeatherStationWebApp.Tests
             _opt = new DbContextOptionsBuilder<ApplicationDbContext>().UseInMemoryDatabase(databaseName: "TestDB").Options;
             _fakeHub = Substitute.For<IHubContext<UpdateHub>>();
 
-            List<Observation> weatherObservations = _dummyData;
+            //create 10 dummy observations. increment day each time
+            for(int i = 1; i<=10; i++)
+            {
+                _dummyData.Add(
+                    new Observation()
+                    {
+                        ObservationId = i,
+                        Time = _initialTime.AddDays(i)
+                    }
+                );
+            }
+            
             _context = new ApplicationDbContext(_opt);
             _context.Database.EnsureCreated();
-            _context.Observations.AddRange(weatherObservations);
+            _context.Observations.AddRange(_dummyData);
             _context.SaveChanges();
 
             _uut = new ObservationsController(_context, _fakeHub);
@@ -67,6 +56,7 @@ namespace WeatherStationWebApp.Tests
         public void TearDown()
         {
             _context.Database.EnsureDeleted();
+            _dummyData.Clear();
         }
 
         [Test]
@@ -84,51 +74,67 @@ namespace WeatherStationWebApp.Tests
             var obs = await _uut.GetObservations();
             var obsList = obs.Value.ToList();
 
-            var obsExpected = GetDtoWeatherObservationsForTest().OrderByDescending(o => o.Time).Take(3).ToList();
-
-            for(int i = 0; i < 3; i++)
-            {
-                Assert.That(obsList[i].Time, Is.EqualTo(obsExpected[i].Time));
-            }
+            Assert.AreEqual(obsList[0].Time, _initialTime.AddDays(10));
+            Assert.AreEqual(obsList[1].Time, _initialTime.AddDays(9));
+            Assert.AreEqual(obsList[2].Time, _initialTime.AddDays(8));
         }
 
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        public async Task GetObservations_Range_CorrectResults(int dayRange)
+        {
+            DateTime start = _initialTime;
+            DateTime end = _initialTime.AddDays(dayRange);
+
+            var obs = await _uut.GetObservations(start, end);
+            var obsList = obs.Value.ToList();
+
+            Assert.AreEqual(obsList.Count, dayRange);
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        public async Task GetWeatherObservation_PassId_ReturnCorrectObservation(int idResult)
+        {
+            var obs = await _uut.GetWeatherObservation(idResult);
+            var obsVal = obs.Value;
+
+            Assert.AreEqual(obsVal.ObservationId, idResult);
+            Assert.AreEqual(obsVal.Time, _initialTime.AddDays(idResult));
+        }
+        
         [Test]
-        public async Task GetObservations_WithTimeSpanThreeHours_DbSeeded_ReturnsCorrectDtoWeatherObservations()
+        public async Task PostWeatherObservation_ValueIsAppended()
         {
-            DateTime startTime = _initialTime;
-            DateTime endTime = _initialTime.AddHours(3); //Should only contain 2 weatherObservations in this time-range
-
-            var result = await _uut.GetObservations(startTime, endTime);
-            var returnedList = result.Value.ToList();
-
-            Assert.That(returnedList.Count, Is.EqualTo(2));
-            Assert.That(returnedList[0].Time, Is.GreaterThanOrEqualTo(startTime).And.LessThanOrEqualTo(endTime));
-            Assert.That(returnedList[1].Time, Is.GreaterThanOrEqualTo(startTime).And.LessThanOrEqualTo(endTime));
-        }
-
-        // HELPERS
-
-        private List<Observation> GetDtoWeatherObservationsForTest()
-        {
-            var weatherObservations = _dummyData;
-
-            List<Observation> dtoWeatherObservations = new List<Observation>();
-
-            foreach (var weatherObservation in weatherObservations)
+            await _uut.PostWeatherObservation(new Observation()
             {
-                dtoWeatherObservations.Add(new Observation()
-                {
-                    Time = weatherObservation.Time,
-                    Temperature = weatherObservation.Temperature,
-                    Humidity = weatherObservation.Humidity,
-                    AirPressure = weatherObservation.AirPressure,
-                    Latitude = weatherObservation.Latitude,
-                    Longitude = weatherObservation.Longitude,
-                    LocationName = weatherObservation.LocationName
-                });
-            }
+                ObservationId = 11,
+                Time = _initialTime.AddDays(11),
+                Temperature = 20,
+                AirPressure = 30,
+                Humidity = 40,
+                LocationName = "Aarhus",
+                Latitude = 50,
+                Longitude = 60,
+                Description = "Nice and warm"
+            });
 
-            return dtoWeatherObservations;
+            var obs = await _uut.GetWeatherObservation(11);
+            var obsVal = obs.Value;
+
+            Assert.AreEqual(obsVal.ObservationId, 11);
+            Assert.AreEqual(obsVal.Time, _initialTime.AddDays(11));
+            Assert.AreEqual(obsVal.Temperature, 20);
+            Assert.AreEqual(obsVal.AirPressure, 30);
+            Assert.AreEqual(obsVal.Humidity, 40);
+            Assert.AreEqual(obsVal.LocationName, "Aarhus");
+            Assert.AreEqual(obsVal.Latitude, 50);
+            Assert.AreEqual(obsVal.Longitude, 60);
+            Assert.AreEqual(obsVal.Description, "Nice and warm");
         }
     }
 }
