@@ -88,7 +88,7 @@ namespace WeatherStationWebApp.Tests
             DateTime start = _initialTime;
             DateTime end = _initialTime.AddDays(dayRange);
 
-            var obs = await _uut.GetObservations(start, end);
+            var obs = await _uut.GetObservationsRange(start, end);
             var obsList = obs.Value.ToList();
 
             Assert.AreEqual(obsList.Count, dayRange);
@@ -100,7 +100,7 @@ namespace WeatherStationWebApp.Tests
         [TestCase(4)]
         public async Task GetWeatherObservation_PassId_ReturnCorrectObservation(int idResult)
         {
-            var obs = await _uut.GetWeatherObservation(idResult);
+            var obs = await _uut.GetObservationById(idResult);
             var obsVal = obs.Value;
 
             Assert.AreEqual(obsVal.ObservationId, idResult);
@@ -110,7 +110,7 @@ namespace WeatherStationWebApp.Tests
         [Test]
         public async Task PostWeatherObservation_ValueIsAppended()
         {
-            await _uut.PostWeatherObservation(new Observation()
+            await _uut.PostObservation(new Observation()
             {
                 ObservationId = 11,
                 Time = _initialTime.AddDays(11),
@@ -123,7 +123,7 @@ namespace WeatherStationWebApp.Tests
                 Description = "Nice and warm"
             });
 
-            var obs = await _uut.GetWeatherObservation(11);
+            var obs = await _uut.GetObservationById(11);
             var obsVal = obs.Value;
 
             Assert.AreEqual(obsVal.ObservationId, 11);

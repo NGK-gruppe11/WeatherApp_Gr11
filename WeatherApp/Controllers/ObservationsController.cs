@@ -31,27 +31,15 @@ namespace WeatherApp.Controllers
         {
             var observations = await _context.Observations.OrderByDescending(o => o.Time).Take(3).ToListAsync();
 
-            foreach (var o in observations)
-            {
-                o.AirPressure = Math.Round(o.AirPressure, 1);
-                o.Temperature = Math.Round(o.Temperature, 1);
-            }
-
             return observations;
 
         } 
 
         // get within time range
         [HttpGet("daterange/{start}/{end}")]
-        public async Task<ActionResult<IEnumerable<Observation>>> GetObservations(DateTime start, DateTime end)
+        public async Task<ActionResult<IEnumerable<Observation>>> GetObservationsRange(DateTime start, DateTime end)
         {
             var observations = await _context.Observations.Where(o => o.Time >= start && o.Time <= end).OrderByDescending(o => o.Time).ToListAsync();
-
-            foreach (var o in observations)
-            {
-                o.AirPressure = Math.Round(o.AirPressure, 1);
-                o.Temperature = Math.Round(o.Temperature, 1);
-            }
 
             return observations;
         }
@@ -59,7 +47,7 @@ namespace WeatherApp.Controllers
         
         // get by id
         [HttpGet("id/{id}")]
-        public async Task<ActionResult<Observation>> GetWeatherObservation(int id)
+        public async Task<ActionResult<Observation>> GetObservationById(int id)
         {
             var observations = await _context.Observations.FindAsync(id);
 
@@ -68,16 +56,13 @@ namespace WeatherApp.Controllers
                 return NotFound();
             }
 
-            observations.AirPressure = Math.Round(observations.AirPressure, 1);
-            observations.Temperature = Math.Round(observations.Temperature, 1);
-
             return observations;
         }
 
         // post observation
         [HttpPost("create")]
         [Authorize]
-        public async Task<ActionResult<Observation>> PostWeatherObservation(Observation o)
+        public async Task<ActionResult<Observation>> PostObservation(Observation o)
         {
             var newObservation = new Observation()
             {
@@ -95,7 +80,7 @@ namespace WeatherApp.Controllers
             await _context.SaveChangesAsync();
             await _hubContext.Clients.All.SendAsync("create", o);
 
-            return CreatedAtAction("GetWeatherObservation", new { id = o.ObservationId }, newObservation);
+            return CreatedAtAction("GetObservationById", new { id = o.ObservationId }, newObservation);
         }
     }
 }

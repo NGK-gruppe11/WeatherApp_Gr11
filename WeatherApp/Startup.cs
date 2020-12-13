@@ -38,10 +38,8 @@ namespace WeatherApp
             var appSettings = appSettingsSection.Get<AppSettings>();
             var key = Encoding.UTF8.GetBytes(appSettings.SecretKey);
 
-            //Authentication: Jwtbearer
             services.AddAuthentication(options =>
             {
-                // Uses jwt schemes
                 options.DefaultAuthenticateScheme = "Jwt";
                 options.DefaultChallengeScheme = "Jwt";
             }).AddJwtBearer("Jwt", options =>
