@@ -26,18 +26,9 @@ namespace WeatherApp.Controllers
             _hubContext = hub;
         }
 
-
-        [HttpGet("seed")]
-        public async Task<ActionResult<IEnumerable<Observation>>> Seed()
-        {
-            DbHelper.DummyData(_context);
-
-            return StatusCode(200);
-        }
-
         // GET: api/WeatherObservations
         // Gets last 3 observations
-        [HttpGet]
+        [HttpGet("last3")]
         public async Task<ActionResult<IEnumerable<Observation>>> GetObservations()
         {
             var weatherObservations = await _context.Observations.OrderByDescending(o => o.Time).Take(3).ToListAsync();
@@ -50,25 +41,7 @@ namespace WeatherApp.Controllers
 
             return weatherObservations;
 
-        }
-        
-        // GET: api/WeatherObservations/{date}
-        //[HttpGet("{date}")]
-        [HttpGet("{date}")]
-        public async Task<ActionResult<IEnumerable<Observation>>> GetObservations(DateTime date)
-        {
-            var weatherObservations = await _context.Observations.Where(o => o.Time.Date == date)
-                .OrderByDescending(o => o.Time).ToListAsync();
-
-            foreach (var weatherObservation in weatherObservations)
-            {
-                weatherObservation.AirPressure = Math.Round(weatherObservation.AirPressure, 1);
-                weatherObservation.Temperature = Math.Round(weatherObservation.Temperature, 1);
-            }
-
-            return weatherObservations;
-        }
-        
+        } 
 
         // GET: api/WeatherObservations/{date}
         [HttpGet("{startTime}/{endTime}")]
@@ -105,7 +78,7 @@ namespace WeatherApp.Controllers
         }
 
         // POST: api/WeatherObservations
-        [HttpPost]
+        [HttpPost("create")]
         [Authorize]
         public async Task<ActionResult<Observation>> PostWeatherObservation(Observation observation)
         {
