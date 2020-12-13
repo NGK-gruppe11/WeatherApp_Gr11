@@ -28,15 +28,15 @@ namespace WeatherApp.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterUser([FromBody] DtoUser dtoUser)
+        public async Task<IActionResult> Register([FromBody] User u)
         {
             var newUser = new IdentityUser
             {
-                UserName = dtoUser.Email, 
-                Email = dtoUser.Email
+                UserName = u.Email, 
+                Email = u.Email
             };
 
-            var userCreationResult = await _userManager.CreateAsync(newUser, dtoUser.Password);
+            var userCreationResult = await _userManager.CreateAsync(newUser, u.Password);
 
             if (userCreationResult.Succeeded)
             {
@@ -50,10 +50,10 @@ namespace WeatherApp.Controllers
 
         }
 
-        [HttpPost("jwtlogin")]
-        public async Task<IActionResult> JwtLogin([FromBody] DtoUser dtoUser)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] User u)
         {
-            var user = await _userManager.FindByEmailAsync(dtoUser.Email);
+            var user = await _userManager.FindByEmailAsync(u.Email);
 
             if (user == null)
             {
@@ -61,10 +61,10 @@ namespace WeatherApp.Controllers
                 return BadRequest(ModelState);
             } 
             
-            var passwordSignInResult = await _signInManager.CheckPasswordSignInAsync(user, dtoUser.Password, false); 
+            var passwordSignInResult = await _signInManager.CheckPasswordSignInAsync(user, u.Password, false); 
             
             if (passwordSignInResult.Succeeded) 
-                return new ObjectResult(GenerateToken(dtoUser.Email)); 
+                return new ObjectResult(GenerateToken(u.Email)); 
             
             return BadRequest("Invalid login");
         }

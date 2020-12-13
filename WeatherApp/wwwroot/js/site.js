@@ -6,7 +6,7 @@ conn.start().then(function () {
     console.error(err.toString());
 });
 
-conn.on('NewData', function (msg) {
+conn.on('create', function (msg) {
     var myTable = document.getElementById("myTable");
 
     var row = document.createElement("tr");

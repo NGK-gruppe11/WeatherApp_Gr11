@@ -16,8 +16,8 @@ namespace WeatherApp.Controllers
     [ApiController]
     public class ObservationsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IHubContext<UpdateHub> _hubContext;
+        private readonly ApplicationDbContext _context;
 
         public ObservationsController(ApplicationDbContext context, IHubContext<UpdateHub> hub)
         {
@@ -25,8 +25,7 @@ namespace WeatherApp.Controllers
             _hubContext = hub;
         }
 
-        // GET: api/WeatherObservations
-        // Gets last 3 observations
+        // Gets 3 most recent observations
         [HttpGet("last3")]
         public async Task<ActionResult<IEnumerable<Observation>>> GetObservations()
         {
@@ -42,7 +41,7 @@ namespace WeatherApp.Controllers
 
         } 
 
-        // GET: api/WeatherObservations/{date}
+        // get within time range
         [HttpGet("daterange/{start}/{end}")]
         public async Task<ActionResult<IEnumerable<Observation>>> GetObservations(DateTime start, DateTime end)
         {
@@ -59,9 +58,9 @@ namespace WeatherApp.Controllers
         }
 
         
-        // GET: api/WeatherObservations/5
+        // get by id
         [HttpGet("id/{id}")]
-        public async Task<ActionResult<Observation>> GetWeatherObservation(long id)
+        public async Task<ActionResult<Observation>> GetWeatherObservation(int id)
         {
             var observations = await _context.Observations.FindAsync(id);
 
@@ -76,7 +75,7 @@ namespace WeatherApp.Controllers
             return observations;
         }
 
-        // POST: api/WeatherObservations
+        // post observation
         [HttpPost("create")]
         [Authorize]
         public async Task<ActionResult<Observation>> PostWeatherObservation(Observation o)
@@ -95,8 +94,7 @@ namespace WeatherApp.Controllers
 
             _context.Observations.Add(newObservation);
             await _context.SaveChangesAsync();
-            
-            await _hubContext.Clients.All.SendAsync("NewData", o);
+            await _hubContext.Clients.All.SendAsync("create", o);
 
             return CreatedAtAction("GetWeatherObservation", new { id = o.ObservationId }, newObservation);
         }
