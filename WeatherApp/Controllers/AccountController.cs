@@ -18,13 +18,13 @@ namespace WeatherApp.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly AppSettings _options;
+        private readonly AppSettings _opt;
 
         public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IOptions<AppSettings> options)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _options = options.Value;
+            _opt = options.Value;
         }
 
         [HttpPost("register")]
@@ -80,7 +80,7 @@ namespace WeatherApp.Controllers
                     new DateTimeOffset(DateTime.Now.AddDays(1)).ToUnixTimeSeconds().ToString()),
             };
 
-            var key = Encoding.UTF8.GetBytes(_options.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_opt.SecretKey);
             var token = new JwtSecurityToken(
                 new JwtHeader(
                     new SigningCredentials(
