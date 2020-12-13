@@ -53,7 +53,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"time\": \"1999-12-14\",\r\n    \"temperature\": 1,\r\n    \"humidity\": 2,\r\n    \"airPressure\": 1,\r\n    \"description\": \"Nice observation\",\r\n    \"locationName\": \"Aarhus\",\r\n    \"latitude\": 4,\r\n    \"longitude\": 5\r\n}",
+					"raw": "{\r\n    \"time\": \"2022-12-14\",\r\n    \"temperature\": 1,\r\n    \"humidity\": 2,\r\n    \"airPressure\": 1,\r\n    \"description\": \"Nice observation\",\r\n    \"locationName\": \"Aarhus\",\r\n    \"latitude\": 4,\r\n    \"longitude\": 5\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -133,7 +133,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://localhost:44302/api/Observations/daterange/2000-01-01/2001-12-12",
+					"raw": "https://localhost:44302/api/Observations/daterange/2020-01-01/2023-12-12",
 					"protocol": "https",
 					"host": [
 						"localhost"
@@ -143,8 +143,8 @@
 						"api",
 						"Observations",
 						"daterange",
-						"2000-01-01",
-						"2001-12-12"
+						"2020-01-01",
+						"2023-12-12"
 					]
 				}
 			},
@@ -152,11 +152,18 @@
 		},
 		{
 			"name": "get by id",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
 				"method": "GET",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
 				"url": {
-					"raw": "https://localhost:44302/api/Observations/id/41",
+					"raw": "https://localhost:44302/api/Observations/id/1",
 					"protocol": "https",
 					"host": [
 						"localhost"
@@ -166,7 +173,7 @@
 						"api",
 						"Observations",
 						"id",
-						"41"
+						"1"
 					]
 				}
 			},
