@@ -1,0 +1,45 @@
+@page
+@model WeatherApp.Models.Observation
+
+<div class="row">
+    <div class="col-12">
+        <h1>Live Weather Observations</h1>
+    </div>
+    <div class="col-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Time)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.LocationName)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Latitude)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Longitude)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Temperature)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.AirPressure)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Humidity)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                </tr>
+
+                </thead>
+            <tbody id="myTable">
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="~/lib/js/signalr/dist/browser/signalr.js"></script>
+<script src="~/js/Update.js"></script>
