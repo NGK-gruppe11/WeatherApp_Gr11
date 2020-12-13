@@ -27,8 +27,6 @@ namespace WeatherApp.Controllers
             _options = options.Value;
         }
 
-        // Register og login endpoints below:
-
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] DtoUser dtoUser)
         {

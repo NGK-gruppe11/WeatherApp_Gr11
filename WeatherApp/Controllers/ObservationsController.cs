@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -31,23 +30,23 @@ namespace WeatherApp.Controllers
         [HttpGet("last3")]
         public async Task<ActionResult<IEnumerable<Observation>>> GetObservations()
         {
-            var weatherObservations = await _context.Observations.OrderByDescending(o => o.Time).Take(3).ToListAsync();
+            var observations = await _context.Observations.OrderByDescending(o => o.Time).Take(3).ToListAsync();
 
-            foreach (var weatherObservation in weatherObservations)
+            foreach (var o in observations)
             {
-                weatherObservation.AirPressure = Math.Round(weatherObservation.AirPressure, 1);
-                weatherObservation.Temperature = Math.Round(weatherObservation.Temperature, 1);
+                o.AirPressure = Math.Round(o.AirPressure, 1);
+                o.Temperature = Math.Round(o.Temperature, 1);
             }
 
-            return weatherObservations;
+            return observations;
 
         } 
 
         // GET: api/WeatherObservations/{date}
-        [HttpGet("{startTime}/{endTime}")]
-        public async Task<ActionResult<IEnumerable<Observation>>> GetObservations(DateTime startTime, DateTime endTime)
+        [HttpGet("daterange/{start}/{end}")]
+        public async Task<ActionResult<IEnumerable<Observation>>> GetObservations(DateTime start, DateTime end)
         {
-            var observations = await _context.Observations.Where(o => o.Time >= startTime && o.Time <= endTime)
+            var observations = await _context.Observations.Where(o => o.Time >= start && o.Time <= end)
                 .OrderByDescending(o => o.Time).ToListAsync();
 
             foreach (var o in observations)
@@ -80,48 +79,26 @@ namespace WeatherApp.Controllers
         // POST: api/WeatherObservations
         [HttpPost("create")]
         [Authorize]
-        public async Task<ActionResult<Observation>> PostWeatherObservation(Observation observation)
+        public async Task<ActionResult<Observation>> PostWeatherObservation(Observation o)
         {
             var newObservation = new Observation()
             {
-                Time = observation.Time,
-                Humidity = observation.Humidity,
-                Temperature = observation.Temperature,
-                AirPressure = observation.AirPressure,
-                LocationName = observation.LocationName,
-                Latitude = observation.Latitude,
-                Longitude = observation.Longitude,
-                Description = observation.Description
+                Time = o.Time,
+                Humidity = o.Humidity,
+                Temperature = o.Temperature,
+                AirPressure = o.AirPressure,
+                LocationName = o.LocationName,
+                Latitude = o.Latitude,
+                Longitude = o.Longitude,
+                Description = o.Description
             };
 
             _context.Observations.Add(newObservation);
             await _context.SaveChangesAsync();
             
-            await _hubContext.Clients.All.SendAsync("NewData", observation);
+            await _hubContext.Clients.All.SendAsync("NewData", o);
 
-            return CreatedAtAction("GetWeatherObservation", new { id = observation.ObservationId }, newObservation);
-        }
-
-        // DELETE: api/WeatherObservations/5
-        [HttpDelete("{id}")]
-        [Authorize]
-        public async Task<ActionResult<Observation>> DeleteWeatherObservation(long id)
-        {
-            var weatherObservation = await _context.Observations.FindAsync(id);
-            if (weatherObservation == null)
-            {
-                return NotFound();
-            }
-
-            _context.Observations.Remove(weatherObservation);
-            await _context.SaveChangesAsync();
-
-            return weatherObservation;
-        }
-
-        private bool WeatherObservationExists(long id)
-        {
-            return _context.Observations.Any(e => e.ObservationId == id);
+            return CreatedAtAction("GetWeatherObservation", new { id = o.ObservationId }, newObservation);
         }
     }
 }

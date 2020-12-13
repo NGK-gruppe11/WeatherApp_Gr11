@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WeatherApp.Models;
@@ -19,7 +15,6 @@ namespace WeatherApp.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            /* Write Fluent API configurations here */
             base.OnModelCreating(modelBuilder);
         }
     }
